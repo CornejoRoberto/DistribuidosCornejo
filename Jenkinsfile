@@ -1,9 +1,28 @@
 pipeline {
     agent any
+
+    tools {
+        dockerTool 'Dockertool' // Configura la instalación de Docker en Jenkins
+        nodejs 'Node18'         // Configura la instalación de Node.js en Jenkins
+    }
+
     stages {
-        stage('Verificar Docker') {
+        stage('Construir Imagen Docker') {
             steps {
-                sh 'docker --version'
+                sh 'docker build -t hola-mundo-node:latest .'
+            }
+        }
+
+        stage('Ejecutar Contenedor Node.js') {
+            steps {
+                sh '''
+                    # Detener y eliminar cualquier contenedor previo
+                    docker stop hola-mundo-node || true
+                    docker rm hola-mundo-node || true
+
+                    # Ejecutar el contenedor de la aplicación
+                    docker run -d --name hola-mundo-node -p 3000:3000 hola-mundo-node:latest
+                '''
             }
         }
     }
